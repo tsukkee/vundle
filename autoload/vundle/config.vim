@@ -23,7 +23,7 @@ func! vundle#config#require(bundles) abort
 endf
 
 func! vundle#config#init_bundle(name, opts)
-  let opts = extend(s:parse_options(a:opts), s:parse_name(substitute(a:name,"['".'"]\+','','g')))
+  let opts = extend(s:parse_options(a:opts), s:parse_name(substitute(a:name,"['".'"]\+','','g')), 'keep')
   return extend(opts, copy(s:bundle))
 endf
 
@@ -44,16 +44,25 @@ func! s:parse_name(arg)
   \  || arg =~? '^\w[a-z0-9-]\+/[^/]\+$'
     let uri = 'https://github.com/'.split(arg, ':')[-1]
     let name = substitute(split(uri,'\/')[-1], '\.git\s*$','','i')
+    let type = 'git'
   elseif arg =~? '^\s*\(git@\|git://\)\S\+' 
-  \   || arg =~? '(file|https\?)://'
+  \   || arg =~? '\(file\|https\?\|svn\)://'
   \   || arg =~? '\.git\s*$'
     let uri = arg
     let name = split( substitute(uri,'/\?\.git\s*$','','i') ,'\/')[-1]
+    if uri =~? 'svn'
+      let type = 'svn'
+    elseif uri =~? 'hg' || uri =~? 'https\?://bitbucket'
+      let type = 'hg'
+    else
+      let type = 'git'
+    endif
   else
     let name = arg
     let uri  = 'https://github.com/vim-scripts/'.name.'.git'
+    let type = 'git'
   endif
-  return {'name': name, 'uri': uri }
+  return {'name': name, 'uri': uri, 'type': type}
 endf
 
 func! s:rtp_rm_a()
