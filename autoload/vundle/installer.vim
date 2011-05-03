@@ -68,17 +68,36 @@ func! s:helptags(rtp) abort
 endf
 
 func! s:sync(bang, bundle) abort
-  let git_dir = expand(a:bundle.path().'/.git/')
-  if isdirectory(git_dir)
-    if !(a:bang) | return [0, 'skip'] | endif
-    let cmd = 'cd '.shellescape(a:bundle.path()).' && git pull'
+  if a:bundle.type == 'nosync' | return 1 | endif
 
-    if (has('win32') || has('win64'))
-      let cmd = substitute(cmd, '^cd ','cd /d ','')  " add /d switch to change drives
-      let cmd = '"'.cmd.'"'                          " enclose in quotes
+  let repo_dir = expand(a:bundle.path().'/.'.a:bundle.type)
+  if isdirectory(repo_dir)
+    if !(a:bang) | return 0 | endif
+    let cmd = 'cd '.shellescape(a:bundle.path()).' && '
+    if a:bundle.type == 'svn'
+      let cmd .= 'svn up'
+    elseif a:bundle.type == 'hg'
+      let cmd .= 'hg pull && hg up'
+    elseif a:bundle.type == 'git'
+      let cmd .= 'git pull'
+    else
+      let cmd = ''
     endif
   else
-    let cmd = 'git clone '.a:bundle.uri.' '.shellescape(a:bundle.path())
+    if a:bundle.type == 'svn'
+      let cmd = 'svn checkout '.a:bundle.uri.' '.shellescape(a:bundle.path())
+    elseif a:bundle.type == 'hg'
+      let cmd = 'hg clone '.a:bundle.uri.' '.shellescape(a:bundle.path())
+    elseif a:bundle.type == 'git'
+      let cmd = 'git clone '.a:bundle.uri.' '.shellescape(a:bundle.path())
+    else
+      let cmd = ''
+    endif
+  endif
+
+  if (has('win32') || has('win64'))
+    let cmd = substitute(cmd, '^cd ','cd /d ','')  " add /d switch to change drives
+    let cmd = '"'.cmd.'"'                          " enclose in quotes
   endif
 
   silent exec '!'.cmd
