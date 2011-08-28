@@ -43,7 +43,11 @@ func! s:parse_name(arg)
 
   if    arg =~? '^\s*\(gh\|github\):\S\+'
   \  || arg =~? '^[a-z0-9][a-z0-9-]*/[^/]\+$'
-    let uri = 'https://github.com/'.split(arg, ':')[-1]
+    let protocol = 'https'
+    if exists('g:vundle_use_http_for_github') && g:vundle_use_http_for_github
+        let protocol = 'http'
+    endif
+    let uri = protocol.'://github.com/'.split(arg, ':')[-1]
     if uri !~? '\.git$'
       let uri .= '.git'
     endif
@@ -62,8 +66,12 @@ func! s:parse_name(arg)
       let type = 'git'
     endif
   else
+    let protocol = 'https'
+    if exists('g:vundle_use_http_for_github') && g:vundle_use_http_for_github
+        let protocol = 'http'
+    endif
     let name = arg
-    let uri  = 'https://github.com/vim-scripts/'.name.'.git'
+    let uri  = protocol.'://github.com/vim-scripts/'.name.'.git'
     let type = 'git'
   endif
   return {'name': name, 'uri': uri, 'name_spec': arg, 'type': type}
