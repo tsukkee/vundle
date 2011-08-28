@@ -91,7 +91,11 @@ endf
 func! vundle#installer#install(bang, name) abort
   if !isdirectory(g:bundle_dir) | call mkdir(g:bundle_dir, 'p') | endif
 
-  let b = vundle#config#init_bundle(a:name, {})
+  let opts = []
+  if a:bang && !empty(a:name)
+      let opts = filter(copy(g:bundles), 'v:val.name == a:name[1:-2]') " remove quotes
+  endif
+  let b = vundle#config#init_bundle(a:name, opts)
 
   return s:sync(a:bang, b)
 endf
