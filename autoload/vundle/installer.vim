@@ -185,7 +185,7 @@ func! s:helptags(rtp) abort
 endf
 
 func! s:sync(bang, bundle) abort
-  if a:bundle.type == 'nosync' | return 1 | endif
+  if a:bundle.type == 'nosync' | return 'todate' | endif
 
   let repo_dir = expand(a:bundle.path().'/.'.a:bundle.type)
   if isdirectory(repo_dir)
@@ -215,11 +215,6 @@ func! s:sync(bang, bundle) abort
     else
       let cmd = ''
     endif
-  endif
-
-  if (has('win32') || has('win64'))
-    let cmd = substitute(cmd, '^cd ','cd /d ','')  " add /d switch to change drives
-    let cmd = '"'.cmd.'"'                          " enclose in quotes
   endif
 
   let out = s:system(cmd)

@@ -42,7 +42,7 @@ func! s:parse_name(arg)
   let arg = a:arg
 
   if    arg =~? '^\s*\(gh\|github\):\S\+'
-  \  || arg =~? '^\w[a-z0-9-]\+/[^/]\+$'
+  \  || arg =~? '^[a-z0-9][a-z0-9-]*/[^/]\+$'
     let uri = 'https://github.com/'.split(arg, ':')[-1]
     if uri !~? '\.git$'
       let uri .= '.git'
